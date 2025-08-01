@@ -14,6 +14,7 @@ import {
   Zap
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import PaymentModal from "@/components/PaymentModal";
 
 interface Plan {
   id: number;
@@ -36,10 +37,13 @@ const Billing = () => {
   const [currentPlan, setCurrentPlan] = useState<PlanStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [upgradeLoading, setUpgradeLoading] = useState<number | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
-    Promise.all([fetchPlans(), fetchCurrentPlan()]);
+    Promise.all([fetchPlans(), fetchCurrentPlan(), fetchUserEmail()]);
   }, []);
 
   const fetchPlans = async () => {
@@ -82,18 +86,86 @@ const Billing = () => {
     }
   };
 
-  const handleUpgrade = async (planId: number) => {
-    setUpgradeLoading(planId);
-    
-    // Simulate payment process
-    toast({
-      title: "Funcionalidade em Desenvolvimento",
-      description: "A integração com o Mercado Pago está sendo implementada. Em breve você poderá fazer upgrades do seu plano.",
-    });
+  const fetchUserEmail = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:3000/user/profile', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
 
-    setTimeout(() => {
-      setUpgradeLoading(null);
-    }, 2000);
+      if (response.ok) {
+        const userData = await response.json();
+        setUserEmail(userData.email);
+      }
+    } catch (error) {
+      // Fallback if no profile endpoint
+      setUserEmail('user@example.com');
+    }
+  };
+
+  const handleUpgrade = async (planId: number) => {
+    const plan = plans.find(p => p.id === planId);
+    if (!plan) return;
+
+    // For free plans, upgrade immediately
+    if (plan.price === 0) {
+      setUpgradeLoading(planId);
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:3000/plan/upgrade', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            new_plan_id: planId
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Erro ao atualizar plano');
+        }
+
+        toast({
+          title: "Sucesso!",
+          description: `Plano ${plan.name} ativado com sucesso!`,
+        });
+
+        fetchCurrentPlan();
+      } catch (error) {
+        toast({
+          title: "Erro",
+          description: "Erro ao atualizar plano. Tente novamente.",
+          variant: "destructive",
+        });
+      } finally {
+        setUpgradeLoading(null);
+      }
+      return;
+    }
+
+    // For paid plans, open payment modal
+    setSelectedPlan(plan);
+    setShowPaymentModal(true);
+  };
+
+  const handlePaymentSuccess = async () => {
+    toast({
+      title: "Pagamento Aprovado!",
+      description: `Plano ${selectedPlan?.name} ativado com sucesso!`,
+    });
+    
+    // Refresh current plan status
+    await fetchCurrentPlan();
+    setSelectedPlan(null);
+  };
+
+  const handleClosePaymentModal = () => {
+    setShowPaymentModal(false);
+    setSelectedPlan(null);
   };
 
   const formatDate = (dateString: string) => {
@@ -364,6 +436,19 @@ const Billing = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Payment Modal */}
+      {selectedPlan && (
+        <PaymentModal
+          isOpen={showPaymentModal}
+          onClose={handleClosePaymentModal}
+          planName={selectedPlan.name}
+          planPrice={selectedPlan.price}
+          planId={selectedPlan.id}
+          onPaymentSuccess={handlePaymentSuccess}
+          userEmail={userEmail}
+        />
+      )}
     </div>
   );
 };
