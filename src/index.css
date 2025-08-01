@@ -1,96 +1,146 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
+/* Notifly Design System - Cores baseadas em HSL para profissionalismo */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Notifly Dark Theme - Sistema de cores profissional */
+    --background-primary: 210 11% 7%;           /* #121212 - Background principal escuro */
+    --background-card: 225 15% 15%;             /* #1E1E2D - Cards com tonalidade azulada */
+    --background-element: 225 15% 12%;          /* Background de elementos secundários */
+    
+    /* Cor de destaque principal - Verde vibrante */
+    --primary-green: 158 64% 39%;               /* #10B981 - Verde principal */
+    --primary-green-hover: 158 64% 45%;         /* Verde mais claro para hover */
+    --primary-green-dark: 158 64% 30%;          /* Verde escuro para pressed */
+    
+    /* Cor secundária - Azul */
+    --secondary-blue: 217 91% 60%;              /* #3B82F6 - Azul secundário */
+    --secondary-blue-hover: 217 91% 70%;        /* Azul mais claro para hover */
+    
+    /* Textos */
+    --text-primary: 0 0% 100%;                  /* #FFFFFF - Texto principal */
+    --text-secondary: 214 14% 63%;              /* #A0AEC0 - Texto secundário */
+    --text-muted: 214 14% 45%;                  /* Texto mais suave */
+    
+    /* Sistema de cores para componentes */
+    --background: 210 11% 7%;
+    --foreground: 0 0% 100%;
+    
+    --card: 225 15% 15%;
+    --card-foreground: 0 0% 100%;
+    
+    --popover: 225 15% 15%;
+    --popover-foreground: 0 0% 100%;
+    
+    --primary: 158 64% 39%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 225 15% 12%;
+    --secondary-foreground: 0 0% 100%;
+    
+    --muted: 225 15% 12%;
+    --muted-foreground: 214 14% 63%;
+    
+    --accent: 217 91% 60%;
+    --accent-foreground: 0 0% 100%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 225 15% 20%;
+    --input: 225 15% 12%;
+    --ring: 158 64% 39%;
+    
+    --radius: 0.75rem;
+    
+    /* Gradientes e efeitos */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary-green)), hsl(var(--primary-green-hover)));
+    --gradient-card: linear-gradient(145deg, hsl(var(--background-card)), hsl(var(--background-element)));
+    --shadow-elegant: 0 10px 30px -10px hsl(var(--primary-green) / 0.2);
+    --shadow-card: 0 4px 20px -4px hsl(225 15% 5% / 0.8);
+    
+    /* Animações */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s ease-out;
+  }
+}
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  html {
+    @apply dark;
   }
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+  body {
+    @apply bg-background text-foreground font-inter antialiased;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  
+  /* Estilo para botões de destaque */
+  .btn-primary {
+    @apply bg-primary hover:bg-primary/90 text-primary-foreground;
+    transition: var(--transition-fast);
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-elegant);
+  }
+  
+  /* Cards com efeito flutuante */
+  .card-floating {
+    @apply bg-card border border-border/50;
+    background: var(--gradient-card);
+    box-shadow: var(--shadow-card);
+    transition: var(--transition-smooth);
+  }
+  
+  .card-floating:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px -8px hsl(225 15% 5% / 0.9);
+  }
+  
+  /* Animação de entrada suave */
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Efeito de hover em links */
+  .link-hover {
+    @apply relative;
+    transition: var(--transition-fast);
+  }
+  
+  .link-hover::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background: hsl(var(--primary-green));
+    transition: var(--transition-fast);
+  }
+  
+  .link-hover:hover::after {
+    width: 100%;
   }
 }
 
