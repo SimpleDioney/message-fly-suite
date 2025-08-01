@@ -35,12 +35,24 @@ const PaymentModal = ({
   const errorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isOpen && containerRef.current) {
-      initializeMercadoPago();
+    if (isOpen) {
+      console.log('PaymentModal opened, initializing MercadoPago...');
+      console.log('Container exists:', !!containerRef.current);
+      console.log('Plan details:', { planName, planPrice, planId });
+      
+      // Add a small delay to ensure the modal is fully rendered
+      setTimeout(() => {
+        if (containerRef.current) {
+          initializeMercadoPago();
+        } else {
+          console.error('Container still not available after delay');
+        }
+      }, 100);
     }
 
     return () => {
       if (brickControllerRef.current) {
+        console.log('Unmounting brick controller');
         brickControllerRef.current.unmount();
         brickControllerRef.current = null;
       }
@@ -49,15 +61,35 @@ const PaymentModal = ({
 
   const initializeMercadoPago = async () => {
     try {
+      console.log('Starting MercadoPago initialization...');
+      
+      if (!containerRef.current) {
+        console.error('Container ref is null');
+        return;
+      }
+
       // Load MercadoPago script if not already loaded
       if (!window.MercadoPago) {
+        console.log('Loading MercadoPago script...');
         await loadMercadoPagoScript();
+        console.log('MercadoPago script loaded successfully');
+      } else {
+        console.log('MercadoPago script already loaded');
       }
 
+      // Clear any existing brick
       if (brickControllerRef.current) {
+        console.log('Unmounting existing brick...');
         brickControllerRef.current.unmount();
+        brickControllerRef.current = null;
       }
 
+      // Clear container content
+      if (containerRef.current) {
+        containerRef.current.innerHTML = '';
+      }
+
+      console.log('Creating MercadoPago instance with public key:', MERCADO_PAGO_PUBLIC_KEY);
       const mp = new window.MercadoPago(MERCADO_PAGO_PUBLIC_KEY);
 
       const settings = {
@@ -70,7 +102,7 @@ const PaymentModal = ({
         customization: {
           visual: {
             style: {
-              theme: 'dark'
+              theme: 'default'
             }
           },
           paymentMethods: {
@@ -88,8 +120,10 @@ const PaymentModal = ({
             }
           },
           onSubmit: async (formData: any) => {
+            console.log('Form submitted with data:', formData);
             const cardToken = formData?.token;
             if (!cardToken) {
+              console.error('No card token received');
               if (errorRef.current) {
                 errorRef.current.textContent = 'Não foi possível gerar o token do cartão.';
               }
@@ -104,6 +138,7 @@ const PaymentModal = ({
 
             try {
               const token = localStorage.getItem('token');
+              console.log('Sending upgrade request to API...');
               const response = await fetch('http://localhost:3000/plan/upgrade', {
                 method: 'POST',
                 headers: {
@@ -121,9 +156,11 @@ const PaymentModal = ({
                 throw new Error(errorData.message || 'Erro no pagamento');
               }
 
+              console.log('Payment successful');
               onPaymentSuccess();
               onClose();
             } catch (error: any) {
+              console.error('Payment error:', error);
               if (errorRef.current) {
                 errorRef.current.textContent = error.message || 'Erro no pagamento';
               }
@@ -136,7 +173,9 @@ const PaymentModal = ({
         }
       };
 
+      console.log('Creating brick with settings:', settings);
       brickControllerRef.current = await mp.bricks().create('cardPayment', containerRef.current, settings);
+      console.log('Brick created successfully');
     } catch (error) {
       console.error('Error initializing MercadoPago:', error);
       if (errorRef.current) {
@@ -152,10 +191,19 @@ const PaymentModal = ({
         return;
       }
 
+      console.log('Creating script element for MercadoPago...');
       const script = document.createElement('script');
       script.src = 'https://sdk.mercadopago.com/js/v2';
-      script.onload = () => resolve();
-      script.onerror = () => reject(new Error('Failed to load MercadoPago script'));
+      script.async = true;
+      script.onload = () => {
+        console.log('MercadoPago script loaded via onload event');
+        // Wait a bit for the script to be fully available
+        setTimeout(() => resolve(), 100);
+      };
+      script.onerror = (error) => {
+        console.error('Failed to load MercadoPago script:', error);
+        reject(new Error('Failed to load MercadoPago script'));
+      };
       document.head.appendChild(script);
     });
   };

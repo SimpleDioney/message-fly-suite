@@ -97,10 +97,14 @@ const Billing = () => {
 
       if (response.ok) {
         const userData = await response.json();
-        setUserEmail(userData.email);
+        setUserEmail(userData.email || 'user@example.com');
+        console.log('User email fetched:', userData.email);
+      } else {
+        console.log('Profile endpoint not available, using fallback email');
+        setUserEmail('user@example.com');
       }
     } catch (error) {
-      // Fallback if no profile endpoint
+      console.log('Error fetching user email, using fallback:', error);
       setUserEmail('user@example.com');
     }
   };
